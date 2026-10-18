@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DAVID JABEZ.M | SYSTEM_ARCHITECT</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://unpkg.com/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --void-black: #08080c;
+            --dark-metal: #12121a;
+            --neon-primary: #00ff9f;
+            --neon-secondary: #ff0055;
+            --neon-accent: #fcee0a;
+            --text-silver: #e0e0e0;
+        }
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background-color: var(--void-black);
+            color: var(--text-silver);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        h1, h2, h3 {
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+        }
+        /* CRT EFFECTS */
+        .crt-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            pointer-events: none;
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%,
+                rgba(0, 0, 0, 0.2) 50%
+            ), linear-gradient(
+                90deg,
+                rgba(255, 0, 0, 0.05),
+                rgba(0, 255, 0, 0.02),
+                rgba(0, 0, 255, 0.05)
+            );
+            background-size: 100% 4px, 3px 100%;
+        }
+        .bg-grain {
+            position: fixed;
+            inset: 0;
+            z-index: 99;
+            pointer-events: none;
+            background: url('https://grainy-gradients.vercel.app/noise.svg');
+            opacity: 0.1;
+        }
+        .vignette {
+            position: fixed;
+            inset: 0;
+            z-index: 98;
+            pointer-events: none;
+            background: radial-gradient(circle, transparent 20%, rgba(0,0,0,0.9) 100%);
+        }
+        /* NEON EFFECTS */
+        .neon-glow-primary {
+            color: var(--neon-primary);
+            text-shadow: 0 0 5px var(--neon-primary), 0 0 15px var(--neon-primary);
+        }
+        .neon-glow-secondary {
+            color: var(--neon-secondary);
+            text-shadow: 0 0 5px var(--neon-secondary), 0 0 15px var(--neon-secondary);
+        }
+        .btn-cyber {
+            border: 2px solid var(--neon-primary);
+            color: var(--neon-primary);
+            padding: 16px 32px;
+            font-weight: 700;
+            text-transform: uppercase;
+            display: inline-block;
+            transition: all 0.3s ease;
+            background: rgba(0, 255, 159, 0.05);
+            box-shadow: 0 0 10px rgba(0, 255, 159, 0.2), inset 0 0 10px rgba(0, 255, 159, 0.1);
+            cursor: pointer;
+            position: relative;
+        }
+        .btn-cyber:hover {
+            background: var(--neon-primary);
+            color: var(--void-black);
+            box-shadow: 0 0 30px var(--neon-primary), inset 0 0 10px rgba(0,0,0,0.5);
+            transform: translateY(-2px);
+        }
+        /* TERMINAL CARDS */
+        .terminal-card {
+            background: rgba(18, 18, 26, 0.95);
+            border: 2px solid var(--neon-primary);
+            position: relative;
+            transition: all 0.3s ease;
+            z-index: 10;
+            box-shadow: 0 0 15px rgba(0, 255, 159, 0.1);
+        }
+        .terminal-card::before, .terminal-card::after {
+            content: '';
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            border-color: var(--neon-primary);
+            border-style: solid;
+        }
+        .terminal-card::before { top: 0; left: 0; border-width: 3px 0 0 3px; }
+        .terminal-card::after { bottom: 0; right: 0; border-width: 0 3px 3px 0; }
+        .terminal-card:hover {
+            border-color: var(--neon-secondary);
+            box-shadow: 0 0 20px rgba(255, 0, 85, 0.2);
+            transform: translateY(-5px);
+        }
+        .terminal-card:hover .case-label {
+            color: var(--neon-secondary);
+        }
+        .case-label {
+            color: var(--neon-primary);
+            transition: color 0.3s ease;
+        }
+        /* RETICLE CURSOR */
+        .cursor-reticle {
+            position: fixed;
+            width: 50px;
+            height: 50px;
+            pointer-events: none;
+            z-index: 1000;
+            transform: translate(-50%, -50%);
+        }
+        .reticle-line {
+            position: absolute;
+            background: var(--neon-primary);
+            transition: all 0.2s ease;
+        }
+        .r-h { width: 100%; height: 1px; top: 50%; left: 0; }
+        .r-v { width: 1px; height: 100%; left: 50%; top: 0; }
+        .reticle-dot {
+            position: absolute;
+            width: 4px; height: 4px;
+            background: var(--neon-primary);
+            border-radius: 50%;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: 0 0 10px var(--neon-primary);
+        }
+        /* BOOT SEQUENCE */
+        #boot-screen {
+            position: fixed;
+            inset: 0;
+            background: var(--void-black);
+            z-index: 2000;
+            padding: 40px;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--neon-primary);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            pointer-events: none;
+            opacity: 0; /* Start hidden to avoid flash */
+            transition: opacity 0.8s ease;
+        }
+        .boot-line {
+            margin-bottom: 4px;
+            font-size: 14px;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="boot-screen"></div>
+    <div class="crt-overlay"></div>
+    <div class="bg-grain"></div>
+    <div class="vignette"></div>
+
+    <div class="cursor-reticle" id="cursor">
+        <div class="reticle-line r-h"></div>
+        <div class="reticle-line r-v"></div>
+        <div class="reticle-dot"></div>
+    </div>
+
+    <nav class="fixed top-0 left-0 w-full z-50 px-8 py-6 flex justify-between items-center backdrop-blur-md border-b border-neon-primary/20">
+        <div class="font-black text-xl uppercase tracking-tighter neon-glow-primary">David Jabez.M</div>
+        <div class="flex gap-6 font-bold uppercase text-xs tracking-widest">
+            <a href="#work" class="hover:text-neon-primary transition-colors">Work</a>
+            <a href="#about" class="hover:text-neon-primary transition-colors">About</a>
+            <a href="mailto:jabeztechw@gmail.com" class="btn-cyber px-4 py-2 text-[10px]">Initialize_Contact</a>
+        </div>
+    </nav>
+
+    <main class="relative z-10">
+        <!-- HERO SECTION -->
+        <section class="min-h-screen px-8 flex flex-col justify-center relative overflow-hidden max-w-6xl mx-auto">
+            <div class="absolute top-20 right-10 opacity-5 select-none pointer-events-none">
+                <h2 class="text-[20rem] font-black leading-none">VOID</h2>
+            </div>
+
+            <div class="relative z-20">
+                <h1 id="hero-title" class="text-6xl md:text-9xl font-black leading-none mb-8 tracking-tighter opacity-0">
+                    <span class="neon-glow-primary">CYBERPUNK</span><br>
+                    <span class="text-white">ARCHITECT</span>
+                </h1>
+                <p id="hero-sub" class="text-xl md:text-3xl max-w-3xl font-bold leading-tight mb-12 opacity-0">
+                    Engineering <span class="neon-glow-secondary">high-velocity</span> e-commerce interfaces. <br>
+                    Digital storefronts engineered for absolute market dominance.
+                </p>
+                <div id="hero-cta" class="opacity-0">
+                    <a href="mailto:jabeztechw@gmail.com" class="btn-cyber text-xl px-12 py-6">
+                        Execute Project $\rightarrow$
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- STATS SECTION -->
+        <section class="py-24 px-8 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 relative z-20">
+            <div class="text-center p-8 border border-neon-primary/20 bg-neon-primary/5 relative group overflow-hidden">
+                <div class="text-6xl font-black neon-glow-primary decrypt-num" data-value="98">0</div>
+                <p class="text-xs font-bold uppercase tracking-widest text-neon-accent mt-4">SYS_SAT: 98%</p>
+            </div>
+            <div class="text-center p-8 border border-neon-primary/20 bg-neon-primary/5 relative group overflow-hidden">
+                <div class="text-6xl font-black neon-glow-primary decrypt-num" data-value="150">0</div>
+                <p class="text-xs font-bold uppercase tracking-widest text-neon-accent mt-4">DEPLOY_COUNT: 150</p>
+            </div>
+            <div class="text-center p-8 border border-neon-primary/20 bg-neon-primary/5 relative group overflow-hidden">
+                <div class="text-6xl font-black neon-glow-primary decrypt-num" data-value="22">0</div>
+                <p class="text-xs font-bold uppercase tracking-widest text-neon-accent mt-4">CONV_LIFT: 22%</p>
+            </div>
+        </section>
+
+        <!-- WORK SECTION -->
+        <section id="work" class="py-24 px-8 max-w-6xl mx-auto relative z-20">
+            <div class="flex justify-between items-end mb-24">
+                <h2 class="text-5xl md:text-7xl font-black neon-glow-primary tracking-tighter">DATA_FRAGMENTS</h2>
+                <span class="text-xs opacity-50 uppercase tracking-widest">Archive: 2023—2026</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Case 01 -->
+                <div class="terminal-card p-10 group cursor-pointer">
+                    <div class="flex justify-between items-start mb-6">
+                        <span class="text-xs font-bold case-label">[ 01 // Bio-Tech Optimization ]</span>
+                        <span class="text-xs opacity-50">2025</span>
+                    </div>
+                    <h3 class="text-3xl font-black mb-4 group-hover:text-neon-primary transition-colors">SMART NURSE</h3>
+                    <p class="text-md mb-8 opacity-70">Healthcare e-commerce optimization. Streamlining medical supply procurement.</p>
+                    <a href="https://smartnursev11.pages.dev/" target="_blank" class="text-xs font-bold uppercase tracking-widest neon-glow-primary hover:underline">Execute $\rightarrow$</a>
+                </div>
+                <!-- Case 02 -->
+                <div class="terminal-card p-10 group cursor-pointer">
+                    <div class="flex justify-between items-start mb-6">
+                        <span class="text-xs font-bold case-label">[ 02 // Agency Command Center ]</span>
+                        <span class="text-xs opacity-50">2024</span>
+                    </div>
+                    <h3 class="text-3xl font-black mb-4 group-hover:text-neon-primary transition-colors">JABEZ TEAMS</h3>
+                    <p class="text-md mb-8 opacity-70">Team management portal for digital agencies. High-efficiency tracking.</p>
+                    <a href="https://jabezteams.pages.dev/" target="_blank" class="text-xs font-bold uppercase tracking-widest neon-glow-primary hover:underline">Execute $\rightarrow$</a>
+                </div>
+                <!-- Case 03 -->
+                <div class="terminal-card p-10 group cursor-pointer">
+                    <div class="flex justify-between items-start mb-6">
+                        <span class="text-xs font-bold case-label">[ 03 // Emotional Trigger UX ]</span>
+                        <span class="text-xs opacity-50">2024</span>
+                    </div>
+                    <h3 class="text-3xl font-black mb-4 group-hover:text-neon-primary transition-colors">HAPPY FATHER</h3>
+                    <p class="text-md mb-8 opacity-70">Niche gift e-commerce site. Optimized for emotional triggers.</p>
+                    <a href="https://happyfather.pages.dev/" target="_blank" class="text-xs font-bold uppercase tracking-widest neon-glow-primary hover:underline">Execute $\rightarrow$</a>
+                </div>
+                <!-- Case 04 -->
+                <div class="terminal-card p-10 group cursor-pointer">
+                    <div class="flex justify-between items-start mb-6">
+                        <span class="text-xs font-bold case-label">[ 04 // Bespoke Flora Interface ]</span>
+                        <span class="text-xs opacity-50">2023</span>
+                    </div>
+                    <h3 class="text-3xl font-black mb-4 group-hover:text-neon-primary transition-colors">HAPPY MOTHER ANNIE</h3>
+                    <p class="text-md mb-8 opacity-70">Bespoke floral and gift shop. Personalized gift-wrapping UX.</p>
+                    <a href="https://happymotherannie.pages.dev/" target="_blank" class="text-xs font-bold uppercase tracking-widest neon-glow-primary hover:underline">Execute $\rightarrow$</a>
+                </div>
+                <!-- Case 05 -->
+                <div class="terminal-card p-10 group cursor-pointer">
+                    <div class="flex justify-between items-start mb-6">
+                        <span class="text-xs font-bold case-label">[ 05 // Ancient-Modern Fusion ]</span>
+                        <span class="text-xs opacity-50">2023</span>
+                    </div>
+                    <h3 class="text-3xl font-black mb-4 group-hover:text-neon-primary transition-colors">DHANVANTRI</h3>
+                    <p class="text-md mb-8 opacity-70">Ayurvedic health store. Balanced traditional values with modern conversion.</p>
+                    <a href="https://dhanvantri1.pages.dev/" target="_blank" class="text-xs font-bold uppercase tracking-widest neon-glow-primary hover:underline">Execute $\rightarrow$</a>
+                </div>
+                <!-- Case 06 -->
+                <div class="terminal-card p-10 group cursor-pointer">
+                    <div class="flex justify-between items-start mb-6">
+                        <span class="text-xs font-bold case-label">[ 06 // Conversion Protocol ]</span>
+                        <span class="text-xs opacity-50">2023</span>
+                    </div>
+                    <h3 class="text-3xl font-black mb-4 group-hover:text-neon-primary transition-colors">DHANVANTRI LANDING</h3>
+                    <p class="text-md mb-8 opacity-70">High-converting landing page for Ayurvedic product launches.</p>
+                    <a href="https://dhanvantri-landingpage.pages.dev/" target="_blank" class="text-xs font-bold uppercase tracking-widest neon-glow-primary hover:underline">Execute $\rightarrow$</a>
+                </div>
+                <!-- Case 07 -->
+                <div class="terminal-card p-10 group cursor-pointer">
+                    <div class="flex justify-between items-start mb-6">
+                        <span class="text-xs font-bold case-label">[ 07 // Architectural Blueprint ]</span>
+                        <span class="text-xs opacity-50">2023</span>
+                    </div>
+                    <h3 class="text-3xl font-black mb-4 group-hover:text-neon-primary transition-colors">JABEZ PORTFOLIO</h3>
+                    <p class="text-md mb-8 opacity-70">Personal showcase of architectural design and frontend engineering.</p>
+                    <a href="https://portfoliodavidjabez.pages.dev/" target="_blank" class="text-xs font-bold uppercase tracking-widest neon-glow-primary hover:underline">Execute $\rightarrow$</a>
+                </div>
+                <!-- Case 08 -->
+                <div class="terminal-card p-10 group cursor-pointer">
+                    <div class="flex justify-between items-start mb-6">
+                        <span class="text-xs font-bold case-label">[ 08 // Interactive Experience ]</span>
+                        <span class="text-xs opacity-50">2023</span>
+                    </div>
+                    <h3 class="text-3xl font-black mb-4 group-hover:text-neon-primary transition-colors">B-DAY APPA</h3>
+                    <p class="text-md mb-8 opacity-70">Luxe interactive digital birthday experience.</p>
+                    <a href="https://happybirthdayappa.pages.dev/" target="_blank" class="text-xs font-bold uppercase tracking-widest neon-glow-primary hover:underline">Execute $\rightarrow$</a>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABOUT SECTION -->
+        <section id="about" class="py-24 px-8 max-w-6xl mx-auto relative z-20">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-24 items-center">
+                <div class="relative">
+                    <div class="p-12 border-2 border-neon-primary bg-neon-primary/10 shadow-[0_0_30px_rgba(0,255,159,0.2)]">
+                        <p class="text-2xl font-bold leading-relaxed neon-glow-primary">
+                            "I don't build websites. I build high-conversion digital weaponry for the e-commerce era."
+                        </p>
+                    </div>
+                </div>
+                <div>
+                    <h2 class="text-5xl font-black mb-8 neon-glow-primary">SYSTEM_LOGS</h2>
+                    <p class="text-xl opacity-80 leading-relaxed mb-12">
+                        I blend the aesthetics of a dystopian future with the precision of conversion rate optimization. My goal is absolute dominance of the digital storefront.
+                    </p>
+                    <div class="grid grid-cols-2 gap-4 font-bold text-xs uppercase">
+                        <div class="border border-neon-primary/40 p-3 hover:bg-neon-primary/10 transition-colors">Next.js Core</div>
+                        <div class="border border-neon-primary/40 p-3 hover:bg-neon-primary/10 transition-colors">Tailwind Engine</div>
+                        <div class="border border-neon-primary/40 p-3 hover:bg-neon-primary/10 transition-colors">Shopify Plus</div>
+                        <div class="border border-neon-primary/40 p-3 hover:bg-neon-primary/10 transition-colors">CRO Optimization</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FINAL CTA -->
+        <section class="py-24 px-8 text-center relative z-20">
+            <h2 class="text-6xl md:text-8xl font-black mb-12 leading-tight tracking-tighter">
+                READY TO <span class="neon-glow-secondary">UPGRADE</span><br>YOUR SYSTEM?
+            </h2>
+            <a href="mailto:jabeztechw@gmail.com" class="btn-cyber text-2xl px-16 py-8">
+                Initialize_Connection $\rightarrow$
+            </a>
+        </section>
+    </main>
+
+    <footer class="px-8 py-12 border-t border-neon-primary/30 flex flex-col md:flex-row justify-between items-center gap-8 uppercase font-bold text-xs relative z-20 opacity-60">
+        <div>v2.0.26 // DAVID_JABEZ_M // END_OF_LINE</div>
+        <div class="flex gap-8">
+            <a href="mailto:jabeztechw@gmail.com" class="hover:text-neon-primary transition-colors">Email</a>
+            <a href="https://www.instagram.com/webmakers123" target="_blank" class="hover:text-neon-primary transition-colors">Instagram</a>
+        </div>
+    </footer>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Custom Reticle Cursor
+        const cursor = document.getElementById('cursor');
+        window.addEventListener('mousemove', (e) => {
+            gsap.to(cursor, {
+                x: e.clientX,
+                y: e.clientY,
+                duration: 0.1,
+                ease: "power2.out"
+            });
+        });
+
+        // Boot Sequence
+        const bootLines = [
+            "SYS_LOAD: 0%... INITIALIZING",
+            "MEM_CHECK: 64GB OK",
+            "KERNEL_LOAD: OK",
+            "NET_PROTOCOLS: ACTIVE",
+            "USER_IDENTITY: DAVID_JABEZ_M",
+            "ACCESS_LEVEL: ARCHITECT",
+            "STATUS: READY",
+            "-------------------------",
+            "WELCOME TO THE VOID_STUDIO"
+        ];
+
+        async function runBootSequence() {
+            const bootScreen = document.getElementById('boot-screen');
+            for (let line of bootLines) {
+                const div = document.createElement('div');
+                div.className = 'boot-line';
+                div.innerText = `> ${line}`;
+                bootScreen.appendChild(div);
+                await gsap.to(div, { opacity: 1, duration: 0.05 });
+                await new Promise(r => setTimeout(r, Math.random() * 100 + 50));
+            }
+
+            await new Promise(r => setTimeout(r, 500));
+            gsap.to(bootScreen, {
+                opacity: 0,
+                duration: 0.8,
+                onComplete: () => {
+                    bootScreen.style.display = 'none';
+                    startHeroAnimations();
+                }
+            });
+        }
+
+        function startHeroAnimations() {
+            const tl = gsap.timeline();
+            tl.to("#hero-title", { opacity: 1, y: 0, duration: 0.8, ease: "expo.out" })
+              .to("#hero-sub", { opacity: 1, x: 0, duration: 0.6 }, "-=0.4")
+              .to("#hero-cta", { opacity: 1, scale: 1, duration: 0.6 }, "-=0.2");
+        }
+
+        // Decrypting Numbers
+        const decryptNums = document.querySelectorAll('.decrypt-num');
+        decryptNums.forEach(num => {
+            const target = +num.getAttribute('data-value');
+            ScrollTrigger.create({
+                trigger: num,
+                onEnter: () => {
+                    let iterations = 0;
+                    const maxIterations = 20;
+                    const interval = setInterval(() => {
+                        num.innerText = Math.floor(Math.random() * 100);
+                        iterations++;
+                        if (iterations >= maxIterations) {
+                            clearInterval(interval);
+                            num.innerText = target;
+                        }
+                    }, 30);
+                }
+            });
+        });
+
+        // Terminal Cards Reveal
+        gsap.from(".terminal-card", {
+            opacity: 0,
+            scale: 0.9,
+            y: 30,
+            stagger: 0.1,
+            duration: 0.6,
+            ease: "back.out(1.7)",
+            scrollTrigger: {
+                trigger: "#work",
+                start: "top 98%",
+                toggleActions: "play none none none",
+                once: true
+            }
+        });
+        // Fail-safe for cards - ensure they stay visible
+        ScrollTrigger.refresh();
+        gsap.set(".terminal-card", { opacity: 1, scale: 1, y: 0 });
+
+        window.onload = runBootSequence;
+    </script>
+</body>
+</html>
